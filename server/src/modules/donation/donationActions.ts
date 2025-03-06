@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import donationRepository from "./donationRepository";
 
+// The B of BREAD - Reads operation
 const browse: RequestHandler = async (req, res, next) => {
   try {
     // Fetch all donations
@@ -14,7 +15,6 @@ const browse: RequestHandler = async (req, res, next) => {
   }
 };
 
-// The R of BREAD - Read operation
 const read: RequestHandler = async (req, res, next) => {
   try {
     // Fetch a specific donation based on the provided ID
@@ -27,6 +27,37 @@ const read: RequestHandler = async (req, res, next) => {
       res.sendStatus(404);
     } else {
       res.json(donation);
+    }
+  } catch (err) {
+    // Pass any errors to the error-handling middleware
+    next(err);
+  }
+};
+
+// The E of BREAD - Edit (Update) operation
+const edit: RequestHandler = async (req, res, next) => {
+  try {
+    // Extract the donation data from the request body
+    const updatedDonation = {
+      id: Number(req.params.id),
+      date: req.body.date,
+      picture: req.body.picture,
+      title: req.body.title,
+      description: req.body.description,
+      condition_id: req.body.condition_id,
+      category_id: req.body.category_id,
+      user_id: req.body.user_id,
+    };
+
+    // Update the donation
+    const affectedRows = await donationRepository.update(updatedDonation);
+
+    // If the donation is not updated, respond with HTTP 404 (Not Found)
+    // Otherwise, respond with HTTP 204 (No Content)
+    if (affectedRows === 0) {
+      res.sendStatus(404);
+    } else {
+      res.sendStatus(204);
     }
   } catch (err) {
     // Pass any errors to the error-handling middleware
@@ -59,8 +90,8 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-// The D of BREAD - Add (Delete) operation
-const remove: RequestHandler = async (req, res, next) => {
+// The D of BREAD - Add (Destroy) operation
+const destroy: RequestHandler = async (req, res, next) => {
   try {
     // Fetch a specific donation based on the provided ID
     const donationId = Number(req.params.id);
@@ -80,4 +111,4 @@ const remove: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, read, add, remove };
+export default { browse, read, edit, add, destroy };

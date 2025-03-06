@@ -15,20 +15,14 @@ type Donation = {
 
 class DonationRepository {
   // The C of CRUD - Create operation
-
   async create(donation: Omit<Donation, "id">) {
-    const index = donation.date.indexOf("T");
-    let dateString = donation.date;
-    if (index !== -1) {
-      dateString = donation.date.substring(0, index);
-    }
+    const date = new Date(donation.date);
 
     // Execute the SQL INSERT query to add a new donation to the "donation" table
-
     const [result] = await databaseClient.query<Result>(
       "insert into donation (date, picture, title, description, condition_id, category_id, user_id) values (?, ?, ?, ?, ?, ?, ?)",
       [
-        dateString,
+        date.toISOString().slice(0, 19).replace("T", " "),
         donation.picture,
         donation.title,
         donation.description,
@@ -43,7 +37,6 @@ class DonationRepository {
   }
 
   // The Rs of CRUD - Read operations
-
   async read(id: number) {
     // Execute the SQL SELECT query to retrieve a specific donation by its ID
     const [rows] = await databaseClient.query<Rows>(
@@ -63,11 +56,36 @@ class DonationRepository {
     return rows as Donation[];
   }
 
-  // The D of CRUD - Delete operation
-  // TODO: Implement the delete operation to remove an donation by its ID
+  // The U of CRUD - Update operation
+  async update(donation: Donation) {
+    const date = new Date(donation.date);
 
+    const [result] = await databaseClient.query<Result>(
+      "update donation set date = ?, picture = ?, title = ?, description = ?, condition_id = ?, category_id = ?, user_id = ? where id = ?",
+      [
+        date.toISOString().slice(0, 19).replace("T", " "),
+        donation.picture,
+        donation.title,
+        donation.description,
+        donation.condition_id,
+        donation.category_id,
+        donation.user_id,
+        donation.id,
+      ],
+    );
+
+    return result.affectedRows;
+  }
+
+  // The D of CRUD - Delete operation
   async delete(id: number) {
-    await databaseClient.query<Rows>("DELETE FROM donation WHERE id = ?", [id]);
+    // Execute the SQL DELETE query to remove the donation by its ID
+    const [result] = await databaseClient.query<Result>(
+      "delete from donation where id = ?",
+      [id],
+    );
+
+    return result.affectedRows;
   }
 }
 

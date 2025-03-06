@@ -1,6 +1,6 @@
 import databaseClient from "../../../../database/client";
 
-import type { Rows } from "../../../../database/client";
+import type { Result, Rows } from "../../../../database/client";
 
 type ServiceCategory = {
   id: number;
@@ -9,6 +9,15 @@ type ServiceCategory = {
 
 class ServiceCategoryRepository {
   // The C of CRUD - Create operation
+  async create(serviceCategory: Omit<ServiceCategory, "id">) {
+    // Execute the SQL INSERT query to insert a new service category into the "service_category" table
+    const [result] = await databaseClient.query<Result>(
+      "insert into service_category (name) values (?)",
+      [serviceCategory.name],
+    );
+
+    return result.insertId;
+  }
 
   // The Rs of CRUD - Read operations
 
@@ -33,8 +42,27 @@ class ServiceCategoryRepository {
     return rows as ServiceCategory[];
   }
 
+  // The U of CRUD - Update operation
+  async update(serviceCategory: ServiceCategory) {
+    // Execute the SQL UPDATE query to update the service category by its ID
+    const [result] = await databaseClient.query<Result>(
+      "update service_category set name = ? where id = ?",
+      [serviceCategory.name, serviceCategory.id],
+    );
+
+    return result.affectedRows;
+  }
+
   // The D of CRUD - Delete operation
-  // TODO: Implement the delete operation to remove an service by its ID
+  async delete(id: number) {
+    // Execute the SQL DELETE query to remove the service category by its ID
+    const [result] = await databaseClient.query<Result>(
+      "delete from service_category where id = ?",
+      [id],
+    );
+
+    return result.affectedRows;
+  }
 }
 
 export default new ServiceCategoryRepository();

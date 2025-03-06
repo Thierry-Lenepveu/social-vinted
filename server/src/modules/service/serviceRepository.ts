@@ -15,17 +15,13 @@ class ServiceRepository {
   // The C of CRUD - Create operation
 
   async create(service: Omit<Service, "id">) {
-    const index = service.date.indexOf("T");
-    let dateString = service.date;
-    if (index !== -1) {
-      dateString = service.date.substring(0, index);
-    }
+    const date = new Date(service.date);
 
     // Execute the SQL INSERT query to add a new service to the "service" table
     const [result] = await databaseClient.query<Result>(
       "insert into service (date, title, description, category_id, user_id) values (?, ?, ?, ?, ?)",
       [
-        dateString,
+        date.toISOString().slice(0, 19).replace("T", " "),
         service.title,
         service.description,
         service.category_id,
@@ -56,6 +52,25 @@ class ServiceRepository {
 
     // Return the array of users
     return rows as Service[];
+  }
+
+  // The U of CRUD - Update operation
+  async update(service: Service) {
+    const date = new Date(service.date);
+
+    const [result] = await databaseClient.query<Result>(
+      "update service set date = ?, title = ?, description = ?, category_id = ?, user_id = ? where id = ?",
+      [
+        date.toISOString().slice(0, 19).replace("T", " "),
+        service.title,
+        service.description,
+        service.category_id,
+        service.user_id,
+        service.id,
+      ],
+    );
+
+    return result.affectedRows;
   }
 
   // The D of CRUD - Delete operation

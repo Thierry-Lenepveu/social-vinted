@@ -58,11 +58,11 @@ const add: RequestHandler = async (req, res, next) => {
 };
 
 // The D of BREAD - Add (Delete) operation
-const remove: RequestHandler = async (req, res, next) => {
+const destroy: RequestHandler = async (req, res, next) => {
   try {
     // Fetch a specific service based on the provided ID
     const serviceId = Number(req.params.id);
-    const service = await serviceRepository.read(serviceId);
+    const service = await serviceRepository.delete(serviceId);
 
     // If the service is not found, respond with HTTP 404 (Not Found)
     // Otherwise, respond with the service in JSON format
@@ -78,4 +78,4 @@ const remove: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, read, add, remove };
+export default { browse, read, add, destroy };

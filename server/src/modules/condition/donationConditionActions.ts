@@ -1,13 +1,15 @@
 import type { RequestHandler } from "express";
-import donationCategoryRepository from "./donationCategoryRepository";
+import donationConditionRepository from "./donationConditionRepository";
+import { tr } from "@faker-js/faker/.";
 
+// The B of BREAD - Browse operation
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    // Fetch all donations
-    const donations = await donationCategoryRepository.readAll();
+    // Fetch all conditions
+    const conditions = await donationConditionRepository.readAll();
 
-    // Respond with the donations in JSON format
-    res.json(donations);
+    // Respond with the conditions in JSON format
+    res.json(conditions);
   } catch (err) {
     // Pass any errors to the error-handling middleware
     next(err);
@@ -17,16 +19,16 @@ const browse: RequestHandler = async (req, res, next) => {
 // The R of BREAD - Read operation
 const read: RequestHandler = async (req, res, next) => {
   try {
-    // Fetch a specific donation based on the provided ID
-    const donationId = Number(req.params.id);
-    const donation = await donationCategoryRepository.read(donationId);
+    // Fetch a specific condition based on the provided ID
+    const conditionId = Number(req.params.id);
+    const condition = await donationConditionRepository.read(conditionId);
 
-    // If the donation is not found, respond with HTTP 404 (Not Found)
-    // Otherwise, respond with the donation in JSON format
-    if (donation == null) {
+    // If the condition is not found, respond with HTTP 404 (Not Found)
+    // Otherwise, respond with the condition in JSON format
+    if (condition == null) {
       res.sendStatus(404);
     } else {
-      res.json(donation);
+      res.json(condition);
     }
   } catch (err) {
     // Pass any errors to the error-handling middleware
@@ -37,18 +39,17 @@ const read: RequestHandler = async (req, res, next) => {
 // The E of BREAD - Edit (Update) operation
 const edit: RequestHandler = async (req, res, next) => {
   try {
-    // Extract the donation data from the request body
-    const updatedDonationCategory = {
+    // Extract the condition data from the request body
+    const updatedCondition = {
       id: Number(req.params.id),
       name: req.body.name,
     };
 
-    // Update the donation
-    const affectedRows = await donationCategoryRepository.update(
-      updatedDonationCategory,
-    );
+    // Update the condition
+    const affectedRows =
+      await donationConditionRepository.update(updatedCondition);
 
-    // If the donation is not updated, respond with HTTP 404 (Not Found)
+    // If the condition is not updated, respond with HTTP 404 (Not Found)
     // Otherwise, respond with HTTP 204 (No Content)
     if (affectedRows === 0) {
       res.sendStatus(404);
@@ -65,13 +66,12 @@ const edit: RequestHandler = async (req, res, next) => {
 const add: RequestHandler = async (req, res, next) => {
   try {
     // Extract the condition data from the request body
-    const newDonationCategory = {
+    const newCondition = {
       name: req.body.name,
     };
 
     // Create the donation
-    const insertId =
-      await donationCategoryRepository.create(newDonationCategory);
+    const insertId = await donationConditionRepository.create(newCondition);
 
     // Respond with HTTP 201 (Created) and the ID of the newly inserted donation
     res.status(201).json({ insertId });
@@ -81,13 +81,13 @@ const add: RequestHandler = async (req, res, next) => {
   }
 };
 
-// The D of BREAD - Add (Delete) operation
+// The D of BREAD - Destroy (Delete) operation
 const destroy: RequestHandler = async (req, res, next) => {
   try {
     // Delete a specific category based on the provided ID
-    const donationCategoryId = Number(req.params.id);
+    const conditionId = Number(req.params.id);
 
-    await donationCategoryRepository.delete(donationCategoryId);
+    await donationConditionRepository.delete(conditionId);
 
     // Respond with HTTP 204 (No Content) anyway
     res.sendStatus(204);
@@ -97,4 +97,4 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, read, edit };
+export default { browse, read, edit, add, destroy };
